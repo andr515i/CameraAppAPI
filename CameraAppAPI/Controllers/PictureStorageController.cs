@@ -60,8 +60,6 @@ namespace CameraAppAPI.Controllers
 		[HttpGet("Ping")]
 		public IActionResult Ping()
 		{
-                Console.WriteLine("ping");
-
 			try
 			{
                 return Ok("der er hul igennem!");

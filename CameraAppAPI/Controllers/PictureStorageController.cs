@@ -102,7 +102,6 @@ namespace CameraAppAPI.Controllers
 		[HttpGet("Ping")]
 		public IActionResult Ping()
 		{
-			Console.WriteLine("ping");
 
 			try
 			{

@@ -1,4 +1,5 @@
 ﻿using CameraAppAPI.models;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -29,21 +30,21 @@ namespace CameraAppAPI.Controllers
 		[HttpGet("GetPicture")]
 		public ActionResult<List<string>> GetPicture()
 		{
-            Console.WriteLine("get pictures");
+			Console.WriteLine("get pictures");
 
-            if (pictures.Count > 0)
+			if (pictures.Count > 0)
 			{
 				return Ok(pictures);
 			}
-			return BadRequest(pictures);
+			return (pictures);
 		}
 
 		[Authorize]
 		[HttpPost("SavePicture")]
 		public IActionResult SavePicture([FromBody] string pictureData)
 		{
-            Console.WriteLine("save picture");
-            try
+			Console.WriteLine("save picture");
+			try
 			{
 				pictures.Add(pictureData);
 				return Ok();
@@ -55,16 +56,57 @@ namespace CameraAppAPI.Controllers
 			}
 		}
 
+		[AllowAnonymous]
+		[HttpGet("sendNotification")]
+		public async Task<IActionResult> SendNotification()
+		{
+			try
+			{
+
+				// This registration token comes from the client FCM SDKs.
+				var topic = "camera-app-topic-firebase";
+
+				// See documentation on defining a message payload.
+				var message = new Message()
+				{
+					Topic = topic,
+					Android = new()
+					{
+						Priority = Priority.High,
+						Notification = new AndroidNotification()
+						{
+							Title = "this is a message only to android",
+							Body = "nah, i'd notify.",
+							//ImageUrl = "./Media/goblin.png",
+							Color = "#666666",
+							Sound = "./Media/eagle.ogg"
+						}
+
+					}
+				};
+
+				// Send a message to the devices subscribed to the provided topic.
+				string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+				// Response is a message ID string.
+				Console.WriteLine("Successfully sent message: " + response);
+				return Ok();
+			}
+			catch (Exception e)
+			{
+				await Console.Out.WriteLineAsync("something went wrong... " + e.Message);
+				return BadRequest();
+			}
+		}
 
 		[AllowAnonymous]
 		[HttpGet("Ping")]
 		public IActionResult Ping()
 		{
-                Console.WriteLine("ping");
+			Console.WriteLine("ping");
 
 			try
 			{
-                return Ok("der er hul igennem!");
+				return Ok("der er hul igennem!");
 
 			}
 			catch (Exception e)
@@ -79,17 +121,17 @@ namespace CameraAppAPI.Controllers
 		[HttpPost("Login")]
 		public IActionResult Login([FromBody] Login userLogin)
 		{
-            Console.WriteLine($"login     ${userLogin.Username} : ${userLogin.PasswordEncrypted}");
+			Console.WriteLine($"login     ${userLogin.Username} : ${userLogin.PasswordEncrypted}");
 
-            IActionResult response = Unauthorized();
+			IActionResult response = Unauthorized();
 
 			var user = AuthenticateNewUser(userLogin);
 
 			if (user.Username != null)
 			{
 				var tokenString = GenerateJSONWebToken(user);
-                Console.WriteLine(tokenString);
-                response = Ok(new { token = tokenString });
+				Console.WriteLine(tokenString);
+				response = Ok(new { token = tokenString });
 			}
 
 
@@ -106,7 +148,7 @@ namespace CameraAppAPI.Controllers
 				null,
 				expires: DateTime.Now.AddMinutes(15),
 				signingCredentials: credentials);
-			
+
 			return new JwtSecurityTokenHandler().WriteToken(token);
 
 		}

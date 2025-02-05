@@ -84,12 +84,7 @@ namespace CameraAppAPI
 
 			app.MapControllers();
 
-			var defaultApp = FirebaseApp.Create(new AppOptions()
-			{
-				Credential = GoogleCredential.FromFile("./GoogleFile/***REMOVED***-85e8fd97ac6f.json"),
-				ProjectId = "***REMOVED***",
-			});
-			Console.WriteLine(defaultApp.Name); // "[DEFAULT]"
+
 
 			var defaultAuth = FirebaseAuth.GetAuth(defaultApp);
 

@@ -86,7 +86,6 @@ namespace CameraAppAPI
 
 
 
-			var defaultAuth = FirebaseAuth.GetAuth(defaultApp);
 
 
 
